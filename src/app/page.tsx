@@ -1,29 +1,141 @@
+import Link from "next/link";
+
+import { REVIEW_MIGRATION_SQL } from "@/lib/review-migration";
+import { getReviewDashboardData } from "@/lib/review-dashboard";
+
 import styles from "./page.module.css";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  let dashboard: Awaited<ReturnType<typeof getReviewDashboardData>> | null = null;
+  let connectionMessage: string | null = null;
+
+  try {
+    dashboard = await getReviewDashboardData();
+  } catch (error) {
+    connectionMessage =
+      error instanceof Error ? error.message : "Unknown database connection error.";
+  }
+
+  if (connectionMessage) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <section className={styles.hero}>
+            <div className={styles.heroCopy}>
+              <span className={styles.eyebrow}>AuraFarm Review Dashboard</span>
+              <h1>The landing page cannot open a database session right now.</h1>
+              <p>
+                The review app is online, but the current database connection is not
+                available for request-time reads.
+              </p>
+            </div>
+
+            <div className={styles.connectionNotice}>
+              <span className={styles.connectionTag}>Connection blocked</span>
+              <p>{connectionMessage}</p>
+            </div>
+          </section>
+
+          <section className={styles.infoPanel}>
+            <span className={styles.infoTag}>What to fix</span>
+            <h2>Use a stable direct database connection for the reviewer app.</h2>
+            <p>
+              If another local process or app is holding the current database
+              connection open, the landing page cannot load the review queue stats.
+            </p>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (!dashboard) {
+    throw new Error("Dashboard data was not loaded.");
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.intro}>
-          <span className={styles.eyebrow}>AuraFarm Review</span>
-          <h1>Next.js is set up and ready for your review workflow.</h1>
-          <p>
-            Start building in <code>src/app/page.tsx</code> and expand from the
-            App Router structure already in place.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a className={styles.primary} href="https://nextjs.org/docs">
-            Read Next.js docs
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://react.dev/learn"
-          >
-            React guide
-          </a>
-        </div>
+        <section className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <span className={styles.eyebrow}>AuraFarm Review Dashboard</span>
+            <h1>Review completions before they hit the pending, approved, and live feed states.</h1>
+            <p>
+              This reviewer app is the manual moderation gate for AuraFarm. Approvals
+              award aura points and mark submissions as posted. Rejections remove them
+              from the pending queue and send them back for follow-up.
+            </p>
+          </div>
+
+          {dashboard.schemaReady ? (
+            <div className={styles.statsGrid}>
+              <StatCard
+                description="Completions still waiting for a reviewer decision."
+                label="Pending"
+                value={dashboard.stats.pending}
+              />
+              <StatCard
+                description="Completions already approved and posted."
+                label="Approved"
+                value={dashboard.stats.approved}
+              />
+              <StatCard
+                description="Completions already declined and returned."
+                label="Rejected"
+                value={dashboard.stats.rejected}
+              />
+              <StatCard
+                description="Pending completions with at least one moderation flag."
+                label="Flagged pending"
+                value={dashboard.stats.flaggedPending}
+              />
+            </div>
+          ) : (
+            <div className={styles.migrationNotice}>
+              <span className={styles.migrationTag}>Migration required</span>
+              <p>
+                The live database is missing the review fields this dashboard needs.
+                Run the SQL below before opening the reviewer flow.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {dashboard.schemaReady ? (
+          <section className={styles.startPanel}>
+            <div className={styles.ctaWrap}>
+              <Link className={styles.startButton} href="/reviewing">
+                Start reviewing
+              </Link>
+            </div>
+          </section>
+        ) : (
+          <section className={styles.sqlPanel}>
+            <h2>SQL to run</h2>
+            <pre>{REVIEW_MIGRATION_SQL}</pre>
+          </section>
+        )}
       </main>
     </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  description,
+}: {
+  label: string;
+  value: number;
+  description: string;
+}) {
+  return (
+    <article className={styles.statCard}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <p>{description}</p>
+    </article>
   );
 }

@@ -1,0 +1,455 @@
+.shell {
+  display: grid;
+}
+
+.flashOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+
+.flashApprove {
+  background: rgb(55 178 77);
+}
+
+.flashReject {
+  background: rgb(217 54 47);
+}
+
+.swipeStage,
+.swipeCard,
+.modalCard {
+  position: relative;
+}
+
+.swipeCard,
+.modalCard,
+.actionButton {
+  border: 1px solid rgba(23, 32, 25, 0.09);
+  box-shadow: 0 30px 80px rgba(24, 33, 25, 0.09);
+}
+
+.swipeStage {
+  display: grid;
+  justify-items: center;
+}
+
+.reviewLane {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(104px, 132px) minmax(0, 470px) minmax(104px, 132px);
+  gap: 14px;
+  align-items: center;
+  width: min(100%, 750px);
+}
+
+.sideActionForm {
+  z-index: 3;
+}
+
+.actionButton {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.acceptButton {
+  background: linear-gradient(135deg, #37b24d 0%, #24913a 100%);
+  color: #f6fff6;
+}
+
+.declineButton {
+  background: linear-gradient(135deg, #f05a52 0%, #d9362f 100%);
+  color: #fff8f8;
+}
+
+.swipeCard {
+  overflow: hidden;
+  width: 100%;
+  border-radius: 36px;
+  background: rgba(255, 252, 247, 0.94);
+  backdrop-filter: blur(18px);
+  transition: transform 180ms ease;
+  z-index: 2;
+  touch-action: pan-y;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.draggingCard {
+  transition: none;
+  cursor: grabbing;
+}
+
+.swipeBadgeRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px 0;
+}
+
+.queueTag,
+.swipeBadge,
+.pendingTag,
+.imageFallbackTag {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.queueTag {
+  background: rgba(17, 35, 22, 0.08);
+  color: #243226;
+}
+
+.swipeBadge,
+.pendingTag {
+  background: rgba(34, 109, 49, 0.12);
+  color: #256831;
+}
+
+.cardMedia,
+.modalMedia {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #dce7d8 0%, #f2eee4 100%);
+}
+
+.cardMedia {
+  min-height: 170px;
+  margin: 12px;
+  border-radius: 18px;
+}
+
+.submissionImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.directionStamp {
+  position: absolute;
+  top: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.acceptStamp {
+  right: 12px;
+  border-color: #2a7d39;
+  color: #2a7d39;
+  background: rgba(255, 255, 255, 0.86);
+  opacity: 1;
+}
+
+.declineStamp {
+  left: 12px;
+  border-color: #b3261e;
+  color: #b3261e;
+  background: rgba(255, 255, 255, 0.86);
+  opacity: 1;
+}
+
+.cardBody {
+  padding: 0 14px 14px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.cardHeader h3,
+.modalHeader h2 {
+  font-size: clamp(1.18rem, 1.6vw, 1.6rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: #172019;
+}
+
+.challengeSummary,
+.cardCaption,
+.imageFallback p,
+.flagEmpty,
+.flagList p {
+  color: #4a554b;
+  line-height: 1.65;
+}
+
+.challengeSummary {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.likesPill {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(23, 32, 25, 0.06);
+  font-weight: 700;
+  color: #243226;
+  font-size: 0.7rem;
+}
+
+.cardCaption {
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.cardStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.infoTile,
+.detailList div {
+  border-radius: 20px;
+  padding: 9px 10px;
+  background: rgba(23, 32, 25, 0.04);
+  min-width: 0;
+}
+
+.infoTile span,
+.detailList dt {
+  display: block;
+  margin-bottom: 4px;
+  color: #5b655d;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.infoTile strong,
+.detailList dd {
+  color: #172019;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  color: #5b655d;
+  font-size: 0.62rem;
+}
+
+.imageFallback {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(76, 109, 79, 0.08), rgba(23, 32, 25, 0.02)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(23, 32, 25, 0.03) 0,
+      rgba(23, 32, 25, 0.03) 16px,
+      rgba(255, 255, 255, 0.12) 16px,
+      rgba(255, 255, 255, 0.12) 32px
+    );
+}
+
+.imageFallbackTag {
+  background: rgba(217, 54, 47, 0.12);
+  color: #b3261e;
+}
+
+.imageFallback strong {
+  color: #172019;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(12, 18, 13, 0.56);
+  backdrop-filter: blur(10px);
+  z-index: 40;
+}
+
+.modalCard {
+  width: min(1120px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  overflow-x: hidden;
+  border-radius: 32px;
+  padding: 28px;
+  background: #fffaf1;
+}
+
+.modalHeader,
+.flagHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.modalHeader {
+  margin-bottom: 22px;
+}
+
+.closeButton {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(23, 32, 25, 0.08);
+  color: #172019;
+  cursor: pointer;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.modalBody {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+}
+
+.modalMedia {
+  min-height: 360px;
+  border-radius: 28px;
+}
+
+.modalDetails {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.detailGroup,
+.flagPanel {
+  border-radius: 24px;
+  padding: 22px;
+  background: rgba(23, 32, 25, 0.04);
+  min-width: 0;
+}
+
+.detailGroup h3,
+.flagHeader h3 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #172019;
+}
+
+.detailList,
+.flagList {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.flagHeader span {
+  display: inline-flex;
+  min-width: 42px;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(217, 54, 47, 0.12);
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.flagList {
+  list-style: none;
+}
+
+.flagList li {
+  display: grid;
+  gap: 6px;
+  border-radius: 18px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.flagList strong {
+  color: #172019;
+}
+
+.flagList span {
+  color: #5b655d;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1080px) {
+  .reviewLane,
+  .modalBody {
+    grid-template-columns: 1fr;
+  }
+
+  .sideActionForm {
+    order: 2;
+  }
+
+  .swipeCard {
+    order: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .cardStats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cardHeader,
+  .swipeBadgeRow,
+  .modalHeader,
+  .cardFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cardMedia {
+    min-height: 220px;
+  }
+
+  .modalBackdrop {
+    padding: 12px;
+  }
+
+  .modalCard {
+    padding: 22px;
+    max-height: calc(100vh - 24px);
+  }
+}

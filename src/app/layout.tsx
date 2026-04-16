@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AuraFarm Review",
-  description: "Next.js starter project for AuraFarm Review",
+  description: "Internal review dashboard for AuraFarm challenge approvals",
 };
 
 export default function RootLayout({

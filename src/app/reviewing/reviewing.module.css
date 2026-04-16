@@ -1,0 +1,163 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(55, 178, 77, 0.14), transparent 28%),
+    radial-gradient(circle at top right, rgba(217, 54, 47, 0.12), transparent 28%),
+    linear-gradient(180deg, #f3efe3 0%, #eae3d1 100%);
+  color: #172019;
+  font-family:
+    "Avenir Next",
+    "IBM Plex Sans",
+    "Segoe UI",
+    sans-serif;
+}
+
+.main {
+  width: min(900px, calc(100vw - 40px));
+  margin: 0 auto;
+  padding: 16px 0 20px;
+}
+
+.banner,
+.undoPanel,
+.sqlPanel,
+.emptyState {
+  border: 1px solid rgba(23, 32, 25, 0.09);
+  box-shadow: 0 30px 80px rgba(24, 33, 25, 0.09);
+  border-radius: 32px;
+}
+
+.banner,
+.undoPanel,
+.emptyState {
+  padding: 18px 22px;
+  background: rgba(255, 251, 242, 0.84);
+  backdrop-filter: blur(18px);
+}
+
+.banner {
+  width: min(100%, 720px);
+  margin: 0 auto 12px;
+}
+
+.undoPanel {
+  width: min(100%, 720px);
+  margin: 0 auto 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.bannerTag,
+.undoTag,
+.emptyTag {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bannerTag {
+  background: rgba(17, 35, 22, 0.08);
+  color: #243226;
+}
+
+.undoTag {
+  margin-bottom: 8px;
+  background: rgba(217, 54, 47, 0.1);
+  color: #b3261e;
+}
+
+.emptyTag {
+  background: rgba(34, 109, 49, 0.12);
+  color: #256831;
+}
+
+.banner h1,
+.emptyState h2 {
+  font-size: clamp(1.25rem, 2vw, 1.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+  margin-bottom: 6px;
+  text-wrap: nowrap;
+}
+
+.banner p,
+.undoText,
+.emptyState p {
+  color: #4a554b;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.undoText strong {
+  color: #172019;
+}
+
+.undoButton {
+  min-width: 108px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: #172019;
+  color: #f8fcf7;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sqlPanel {
+  overflow: hidden;
+  background: #112316;
+  color: #f8fcf7;
+}
+
+.sqlPanel h2 {
+  padding: 26px 28px 0;
+  font-size: 1.2rem;
+}
+
+.sqlPanel pre {
+  overflow-x: auto;
+  padding: 22px 28px 30px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #dce9dc;
+}
+
+@media (max-width: 720px) {
+  .main {
+    width: min(100vw - 20px, 900px);
+    padding: 12px 0 20px;
+  }
+
+  .banner,
+  .undoPanel,
+  .emptyState {
+    padding: 16px 18px;
+  }
+
+  .banner {
+    width: 100%;
+  }
+
+  .undoPanel {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .banner h1,
+  .emptyState h2 {
+    text-wrap: balance;
+  }
+}
