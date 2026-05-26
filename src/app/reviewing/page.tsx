@@ -19,9 +19,10 @@ export default async function ReviewingPage() {
   let dashboard: Awaited<ReturnType<typeof getReviewDashboardData>> | null = null;
   let connectionMessage: string | null = null;
   const lastAction = await getLastReviewAction();
+  const skippedReviewIds = await getSkippedReviewIds();
 
   try {
-    dashboard = await getReviewDashboardData();
+    dashboard = await getReviewDashboardData({ skippedCompletionIds: skippedReviewIds });
   } catch (error) {
     connectionMessage =
       error instanceof Error ? error.message : "Unknown database connection error.";
@@ -70,7 +71,8 @@ export default async function ReviewingPage() {
           <span className={styles.bannerTag}>Swipe queue</span>
           <h1>Swipe right to accept. Swipe left to decline.</h1>
           <p>
-            Drag the card or use the side buttons.
+            Drag the card or use the side buttons. Flagged submissions are labeled
+            directly on the card and include the reporting reasons.
           </p>
         </section>
 
@@ -131,4 +133,25 @@ async function getLastReviewAction(): Promise<LastReviewAction | null> {
   }
 
   return null;
+}
+
+async function getSkippedReviewIds(): Promise<number[]> {
+  const cookieStore = await cookies();
+  const rawCookie = cookieStore.get("auraFarmSkippedReviewIds")?.value;
+
+  if (!rawCookie) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawCookie) as unknown;
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter((value): value is number => Number.isInteger(value) && value > 0);
+  } catch {
+    return [];
+  }
 }

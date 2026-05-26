@@ -49,6 +49,14 @@
   z-index: 3;
 }
 
+.skipForm {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  z-index: 4;
+  transform: translateX(-50%);
+}
+
 .actionButton {
   width: 100%;
   min-height: 50px;
@@ -58,6 +66,21 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.skipButton {
+  min-height: 40px;
+  border: 1px solid rgba(23, 32, 25, 0.12);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: rgba(255, 251, 244, 0.96);
+  color: #314034;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 16px 30px rgba(24, 33, 25, 0.08);
 }
 
 .acceptButton {
@@ -97,10 +120,19 @@
   padding: 10px 12px 0;
 }
 
+.swipeBadgeCluster {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .queueTag,
 .swipeBadge,
 .pendingTag,
-.imageFallbackTag {
+.imageFallbackTag,
+.statusBadge,
+.flagCalloutTag {
   display: inline-flex;
   width: fit-content;
   align-items: center;
@@ -123,15 +155,34 @@
   color: #256831;
 }
 
+.statusBadge {
+  background: rgba(191, 108, 0, 0.14);
+  color: #9a5300;
+}
+
+.flaggedBadge,
+.flaggedTag,
+.flagCalloutTag {
+  background: rgba(217, 54, 47, 0.14);
+  color: #a6221b;
+}
+
+.flaggedPendingBadge {
+  background: rgba(191, 108, 0, 0.14);
+  color: #9a5300;
+}
+
 .cardMedia,
 .modalMedia {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #dce7d8 0%, #f2eee4 100%);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.3), transparent 45%),
+    linear-gradient(160deg, #d4dfd2 0%, #eef1e7 48%, #f5ecdf 100%);
 }
 
 .cardMedia {
-  min-height: 170px;
+  min-height: 280px;
   margin: 12px;
   border-radius: 18px;
 }
@@ -139,7 +190,8 @@
 .submissionImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .directionStamp {
@@ -220,6 +272,85 @@
   margin-bottom: 10px;
   font-size: 0.78rem;
   line-height: 1.25;
+}
+
+.flagSummaryPanel,
+.flagCallout {
+  margin-bottom: 12px;
+  border: 1px solid rgba(217, 54, 47, 0.12);
+  border-radius: 22px;
+  padding: 14px 15px;
+  background: linear-gradient(180deg, rgba(255, 235, 232, 0.8), rgba(255, 247, 240, 0.94));
+}
+
+.flagSummaryHeader,
+.flagCalloutHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.flagSummaryHeader strong,
+.flagCalloutHeader strong {
+  color: #641b16;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.flagSummaryHeader span,
+.flagCalloutHeader strong {
+  flex-shrink: 0;
+}
+
+.flagSummaryHeader span {
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(166, 34, 27, 0.1);
+  color: #8f221b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flagReasonPreviewList {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  list-style: none;
+}
+
+.flagReasonPreviewList li {
+  border-radius: 16px;
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.flagReasonPreviewList span {
+  color: #7b2620;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flagReasonPreviewList p,
+.flagSummaryFootnote,
+.flagCallout p {
+  color: #6b4843;
+  line-height: 1.45;
+}
+
+.flagReasonPreviewList p {
+  margin-top: 5px;
+  font-size: 0.76rem;
+}
+
+.flagSummaryFootnote,
+.flagCallout p {
+  margin-top: 9px;
+  font-size: 0.74rem;
 }
 
 .cardStats {
@@ -348,7 +479,7 @@
 }
 
 .modalMedia {
-  min-height: 360px;
+  min-height: 560px;
   border-radius: 28px;
 }
 
@@ -418,6 +549,14 @@
     grid-template-columns: 1fr;
   }
 
+  .skipForm {
+    position: static;
+    transform: none;
+    justify-self: center;
+    order: 0;
+    margin-bottom: 2px;
+  }
+
   .sideActionForm {
     order: 2;
   }
@@ -441,7 +580,7 @@
   }
 
   .cardMedia {
-    min-height: 220px;
+    min-height: 260px;
   }
 
   .modalBackdrop {

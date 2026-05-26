@@ -1,0 +1,58 @@
+.ctaGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 16px;
+  width: min(100%, 940px);
+}
+
+.startButton,
+.plusButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 108px;
+  border-radius: 28px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 24px 48px rgba(23, 32, 25, 0.18);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.startButton {
+  background: linear-gradient(135deg, #172019 0%, #2d4330 100%);
+  color: #f8fcf7;
+  font-size: 1.18rem;
+}
+
+.plusButton {
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(135deg, #d26931 0%, #b84320 100%);
+  color: #fff7f1;
+}
+
+.plusButton span {
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+.plusButton strong {
+  font-size: 0.86rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .startButton:hover,
+  .plusButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 54px rgba(23, 32, 25, 0.22);
+  }
+}
+
+@media (max-width: 720px) {
+  .ctaGrid {
+    grid-template-columns: 1fr;
+  }
+}

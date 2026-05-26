@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { HomeCtaPanel } from "@/components/home-cta-panel";
 import { REVIEW_MIGRATION_SQL } from "@/lib/review-migration";
 import { getReviewDashboardData } from "@/lib/review-dashboard";
 
@@ -65,7 +64,8 @@ export default async function Home() {
             <p>
               This reviewer app is the manual moderation gate for AuraFarm. Approvals
               award aura points and mark submissions as posted. Rejections remove them
-              from the pending queue and send them back for follow-up.
+              from the queue and send them back for follow-up. Approved submissions with
+              fresh user flags also return here for re-review.
             </p>
           </div>
 
@@ -87,9 +87,9 @@ export default async function Home() {
                 value={dashboard.stats.rejected}
               />
               <StatCard
-                description="Pending completions with at least one moderation flag."
-                label="Flagged pending"
-                value={dashboard.stats.flaggedPending}
+                description="Already-approved completions that were flagged and need another look."
+                label="Flagged live"
+                value={dashboard.stats.flaggedApproved}
               />
             </div>
           ) : (
@@ -106,9 +106,7 @@ export default async function Home() {
         {dashboard.schemaReady ? (
           <section className={styles.startPanel}>
             <div className={styles.ctaWrap}>
-              <Link className={styles.startButton} href="/reviewing">
-                Start reviewing
-              </Link>
+              <HomeCtaPanel addChallengeHref="/add-challenge" reviewHref="/reviewing" />
             </div>
           </section>
         ) : (

@@ -3,6 +3,7 @@ import "server-only";
 import { db } from "@/lib/db";
 
 export type ReviewStatus = "pending" | "approved" | "rejected";
+export type ReviewQueueKind = "pending" | "flagged";
 
 export type ReviewFlag = {
   id: number;
@@ -14,6 +15,10 @@ export type ReviewFlag = {
 
 export type PendingReview = {
   completionId: number;
+  reviewStatus: ReviewStatus;
+  queueKind: ReviewQueueKind;
+  queueLabel: string;
+  queueDescription: string;
   caption: string | null;
   imageUrl: string;
   imageUri: string;
@@ -57,6 +62,7 @@ export type ReviewDashboardData =
         approved: number;
         rejected: number;
         flaggedPending: number;
+        flaggedApproved: number;
       };
       nextReview: PendingReview | null;
     };
@@ -66,10 +72,12 @@ type StatsRow = {
   approved: number;
   rejected: number;
   flaggedPending: number;
+  flaggedApproved: number;
 };
 
 type PendingReviewRow = {
   completionId: number;
+  reviewStatus: ReviewStatus;
   caption: string | null;
   imageUrl: string | null;
   imageUri: string;
@@ -129,7 +137,9 @@ export async function hasReviewSchema() {
   return isReady;
 }
 
-export async function getReviewDashboardData(): Promise<ReviewDashboardData> {
+export async function getReviewDashboardData(
+  options?: { skippedCompletionIds?: number[] },
+): Promise<ReviewDashboardData> {
   const schemaReady = await hasReviewSchema();
 
   if (!schemaReady) {
@@ -151,20 +161,53 @@ export async function getReviewDashboardData(): Promise<ReviewDashboardData> {
         WHERE COALESCE(cc."reviewStatus"::text, 'pending') = 'pending'
           AND COALESCE(flag_counts.flag_count, 0) > 0
       )::int AS "flaggedPending"
+      ,
+      COUNT(*) FILTER (
+        WHERE cc."reviewStatus"::text = 'approved'
+          AND COALESCE(flag_counts.flag_count, 0) > 0
+          AND (
+            cc."reviewedAt" IS NULL
+            OR flag_counts.latest_flag_at > cc."reviewedAt"
+          )
+      )::int AS "flaggedApproved"
     FROM public."ChallengeCompletion" cc
     LEFT JOIN (
       SELECT
         "completionId",
-        COUNT(*)::int AS flag_count
+        COUNT(*)::int AS flag_count,
+        MAX("createdAt") AS latest_flag_at
       FROM public."Flag"
       GROUP BY "completionId"
     ) AS flag_counts
       ON flag_counts."completionId" = cc.id
   `);
 
-  const nextReviewPromise = db.query<PendingReviewRow>(`
+  const skippedCompletionIds = Array.from(
+    new Set((options?.skippedCompletionIds ?? []).filter((value) => Number.isInteger(value) && value > 0)),
+  );
+
+  const nextReviewPromise = getNextReview(skippedCompletionIds);
+
+  const [statsResult, nextReviewResult] = await Promise.all([
+    statsPromise,
+    nextReviewPromise,
+  ]);
+
+  const nextReviewRow = nextReviewResult.rows[0];
+
+  if (!nextReviewRow && skippedCompletionIds.length > 0) {
+    const fallbackResult = await getNextReview([]);
+    return finalizeDashboard(statsResult.rows[0], fallbackResult.rows[0]);
+  }
+
+  return finalizeDashboard(statsResult.rows[0], nextReviewRow);
+}
+
+async function getNextReview(skippedCompletionIds: number[]) {
+  return db.query<PendingReviewRow>(`
     SELECT
       cc.id AS "completionId",
+      cc."reviewStatus"::text AS "reviewStatus",
       cc.caption,
       cc."imageUrl",
       cc."imageUri",
@@ -192,22 +235,53 @@ export async function getReviewDashboardData(): Promise<ReviewDashboardData> {
       ON u.id = cc."userId"
     INNER JOIN public."Challenge" c
       ON c.id = cc."challengeId"
-    WHERE COALESCE(cc."reviewStatus"::text, 'pending') = 'pending'
-    ORDER BY cc."completedAt" ASC
+    LEFT JOIN (
+      SELECT
+        "completionId",
+        COUNT(*)::int AS flag_count,
+        MAX("createdAt") AS latest_flag_at
+      FROM public."Flag"
+      GROUP BY "completionId"
+    ) AS flag_counts
+      ON flag_counts."completionId" = cc.id
+    WHERE
+      (
+        COALESCE(cc."reviewStatus"::text, 'pending') = 'pending'
+        OR (
+          cc."reviewStatus"::text = 'approved'
+          AND COALESCE(flag_counts.flag_count, 0) > 0
+          AND (
+            cc."reviewedAt" IS NULL
+            OR flag_counts.latest_flag_at > cc."reviewedAt"
+          )
+        )
+      )
+      AND NOT (cc.id = ANY($1::int[]))
+    ORDER BY
+      CASE
+        WHEN cc."reviewStatus"::text = 'approved'
+          AND COALESCE(flag_counts.flag_count, 0) > 0
+          AND (
+            cc."reviewedAt" IS NULL
+            OR flag_counts.latest_flag_at > cc."reviewedAt"
+          )
+        THEN 0
+        ELSE 1
+      END,
+      COALESCE(flag_counts.latest_flag_at, cc."completedAt") DESC,
+      cc."completedAt" ASC
     LIMIT 1
-  `);
+  `, [skippedCompletionIds]);
+}
 
-  const [statsResult, nextReviewResult] = await Promise.all([
-    statsPromise,
-    nextReviewPromise,
-  ]);
-
-  const nextReviewRow = nextReviewResult.rows[0];
-
+async function finalizeDashboard(
+  stats: StatsRow,
+  nextReviewRow: PendingReviewRow | undefined,
+): Promise<ReviewDashboardData> {
   if (!nextReviewRow) {
     return {
       schemaReady: true,
-      stats: statsResult.rows[0],
+      stats,
       nextReview: null,
     };
   }
@@ -230,14 +304,33 @@ export async function getReviewDashboardData(): Promise<ReviewDashboardData> {
 
   return {
     schemaReady: true,
-    stats: statsResult.rows[0],
+    stats,
     nextReview: mapPendingReview(nextReviewRow, flagsResult.rows),
   };
 }
 
 function mapPendingReview(row: PendingReviewRow, flags: FlagRow[]): PendingReview {
+  const queueKind: ReviewQueueKind =
+    row.reviewStatus === "approved" && flags.length > 0 ? "flagged" : "pending";
+  const queueLabel =
+    queueKind === "flagged"
+      ? "Flagged challenge"
+      : flags.length > 0
+        ? "Flagged pending submission"
+        : "Pending submission";
+  const queueDescription =
+    queueKind === "flagged"
+      ? "This completion was already approved and is back in review because users flagged it."
+      : flags.length > 0
+        ? "This pending submission already has moderation flags attached to it."
+        : "This completion is waiting for its first moderation decision.";
+
   return {
     completionId: row.completionId,
+    reviewStatus: row.reviewStatus,
+    queueKind,
+    queueLabel,
+    queueDescription,
     caption: row.caption,
     imageUrl: row.imageUrl ?? row.imageUri,
     imageUri: row.imageUri,

@@ -180,32 +180,6 @@
     rgba(255, 255, 255, 0.74);
 }
 
-.startButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: min(100%, 760px);
-  min-height: 108px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, #172019 0%, #2d4330 100%);
-  color: #f8fcf7;
-  font-size: 1.18rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  box-shadow: 0 24px 48px rgba(23, 32, 25, 0.18);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .startButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 28px 54px rgba(23, 32, 25, 0.22);
-  }
-}
-
 @media (max-width: 1080px) {
   .hero {
     grid-template-columns: 1fr;

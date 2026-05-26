@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 
-import { approveCompletion, rejectCompletion } from "@/app/actions";
+import { approveCompletion, rejectCompletion, skipReview } from "@/app/actions";
 import type { PendingReview } from "@/lib/review-dashboard";
 
 import styles from "./review-shell.module.css";
@@ -113,6 +113,8 @@ export function ReviewShell({ review }: ReviewShellProps) {
   const tintOpacity = flashDirection
     ? 0.7
     : Math.min(Math.abs(dragX) / SWIPE_THRESHOLD, 1) * 0.7;
+  const flagReasonPreview = review.flags.slice(0, 2);
+  const isFlaggedReview = review.queueKind === "flagged";
 
   return (
     <>
@@ -140,6 +142,13 @@ export function ReviewShell({ review }: ReviewShellProps) {
               </button>
             </form>
 
+            <form action={skipReview} className={styles.skipForm}>
+              <input name="completionId" type="hidden" value={review.completionId} />
+              <button className={styles.skipButton} type="submit">
+                Skip for now
+              </button>
+            </form>
+
           <article
             className={`${styles.swipeCard} ${isDragging ? styles.draggingCard : ""}`}
             onClick={() => {
@@ -162,7 +171,18 @@ export function ReviewShell({ review }: ReviewShellProps) {
           >
             <div className={styles.swipeBadgeRow}>
               <span className={styles.queueTag}>Review #{review.completionId}</span>
-              <span className={styles.swipeBadge}>{swipeHint}</span>
+              <div className={styles.swipeBadgeCluster}>
+                {review.flags.length ? (
+                  <span
+                    className={`${styles.statusBadge} ${
+                      isFlaggedReview ? styles.flaggedBadge : styles.flaggedPendingBadge
+                    }`}
+                  >
+                    {review.queueLabel}
+                  </span>
+                ) : null}
+                <span className={styles.swipeBadge}>{swipeHint}</span>
+              </div>
             </div>
 
             <div className={styles.cardMedia}>
@@ -181,15 +201,43 @@ export function ReviewShell({ review }: ReviewShellProps) {
               </div>
             </div>
 
-            <div className={styles.cardBody}>
-              <div className={styles.cardHeader}>
-                <div>
-                  <span className={styles.pendingTag}>Pending submission</span>
-                  <h3>{review.challenge.title}</h3>
-                  <p className={styles.challengeSummary}>{review.challenge.description}</p>
-                </div>
+              <div className={styles.cardBody}>
+                <div className={styles.cardHeader}>
+                  <div>
+                    <span
+                      className={`${styles.pendingTag} ${
+                        review.flags.length ? styles.flaggedTag : ""
+                      }`}
+                    >
+                      {review.queueLabel}
+                    </span>
+                    <h3>{review.challenge.title}</h3>
+                    <p className={styles.challengeSummary}>{review.challenge.description}</p>
+                  </div>
                 <div className={styles.likesPill}>{review.likes} likes</div>
               </div>
+
+              {review.flags.length ? (
+                <section className={styles.flagSummaryPanel}>
+                  <div className={styles.flagSummaryHeader}>
+                    <strong>{review.queueDescription}</strong>
+                    <span>{review.flags.length} flags</span>
+                  </div>
+                  <ul className={styles.flagReasonPreviewList}>
+                    {flagReasonPreview.map((flag) => (
+                      <li key={flag.id}>
+                        <span>{flag.flaggedBy}</span>
+                        <p>{flag.reason || "No reason supplied."}</p>
+                      </li>
+                    ))}
+                  </ul>
+                  {review.flags.length > flagReasonPreview.length ? (
+                    <p className={styles.flagSummaryFootnote}>
+                      Open the full review to read all {review.flags.length} flag reasons.
+                    </p>
+                  ) : null}
+                </section>
+              ) : null}
 
               <p className={styles.cardCaption}>
                 {review.caption || "No caption included with this submission."}
@@ -201,7 +249,10 @@ export function ReviewShell({ review }: ReviewShellProps) {
                 <InfoTile label="Submitter" value={review.user.name} />
                 <InfoTile label="Flags" value={`${review.flags.length}`} />
                 <InfoTile label="Uploader streak" value={`${review.user.streak} days`} />
-                <InfoTile label="Reviewer target" value={review.flags.length ? "Flagged" : "Clean"} />
+                <InfoTile
+                  label="Reviewer target"
+                  value={review.flags.length ? review.queueLabel : "Clean"}
+                />
                 <InfoTile label="Distance" value={`${review.completionDistanceMiles.toFixed(2)} mi`} />
                 <InfoTile label="Uploaded" value={review.completedAtShortLabel} />
                 <InfoTile label="Aura after approve" value={`${review.user.auraPoints + review.challenge.pointsReward}`} />
@@ -267,6 +318,16 @@ export function ReviewShell({ review }: ReviewShellProps) {
               </section>
 
               <section className={styles.modalDetails}>
+                {review.flags.length ? (
+                  <section className={styles.flagCallout}>
+                    <div className={styles.flagCalloutHeader}>
+                      <span className={styles.flagCalloutTag}>{review.queueLabel}</span>
+                      <strong>{review.flags.length} reports</strong>
+                    </div>
+                    <p>{review.queueDescription}</p>
+                  </section>
+                ) : null}
+
                 <DetailGroup
                   items={[
                     ["Challenge", review.challenge.title],
